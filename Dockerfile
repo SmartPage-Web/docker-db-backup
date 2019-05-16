@@ -43,13 +43,6 @@ COPY --from=mongo-packages / /usr/src/apk
            mongodb-tools*.apk \
            && \
        \
-       cd /usr/src && \
-       mkdir -p pbzip2 && \
-       curl -ssL https://launchpad.net/pbzip2/1.1/1.1.13/+download/pbzip2-1.1.13.tar.gz | tar xvfz - --strip=1 -C /usr/src/pbzip2 && \
-       cd pbzip2 && \
-       make && \
-       make install && \
-       \
 ### Cleanup
        rm -rf /usr/src/* && \
        apk del .db-backup-build-deps && \

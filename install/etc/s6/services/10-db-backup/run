@@ -44,7 +44,7 @@ fi
 
 ### Set Compression Options
 if [ "$PARALLEL_COMPRESSION" = "TRUE " ]; then
-    BZIP="pbzip2"
+    BZIP="bzip2"
     GZIP="pigz"
     XZIP="pixz"
 else

@@ -36,14 +36,12 @@ COPY --from=mongo-packages / /usr/src/apk
        apk add \
            pixz@testing \
            && \
-        
        ## Locally Install Mongo Package
        cd /usr/src/apk && \
        apk add -t .db-backup-mongo-deps --allow-untrusted \
            mongodb-tools*.apk \
            && \
-       \
-### Cleanup
+       ### Cleanup
        rm -rf /usr/src/* && \
        apk del .db-backup-build-deps && \
        rm -rf /tmp/* /var/cache/apk/*

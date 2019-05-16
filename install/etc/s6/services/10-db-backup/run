@@ -95,7 +95,7 @@ fi
 
 ### Functions
 function backup_couch() {
-    TARGET=couch_${DBNAME}_${DBHOST}_${now}.txt
+    TARGET=${DBHOST}_couch_${DBNAME}_${now}.txt
     curl -X GET http://${DBHOST}:${DBPORT}/${DBNAME}/ all docs? include docs=true >${TMPDIR}/${TARGET}
     generate_md5
     compression
@@ -109,7 +109,7 @@ function backup_mysql() {
         for db in $DATABASES; do
                 if [[ "$db" != "information_schema" ]] && [[ "$db" != _* ]] ; then
                     echo "** [db-backup] Dumping database: $db"
-                    TARGET=mysql_${db}_${DBHOST}_${now}.sql
+                    TARGET=${DBHOST}_mysql_${db}_${now}.sql
                     mysqldump --max-allowed-packet=512M -h $DBHOST -u$DBUSER ${MYSQL_PASS_STR} --databases $db > ${TMPDIR}/${TARGET}
                     generate_md5
                     compression
@@ -149,7 +149,7 @@ function backup_pgsql() {
       DATABASES=`psql -h $DBHOST -U $DBUSER -p ${DBPORT} -c 'COPY (SELECT datname FROM pg_database WHERE datistemplate = false) TO STDOUT;' `
             for db in $DATABASES; do
                 echo "** [db-backup] Dumping database: $db"
-                TARGET=pgsql_${db}_${DBHOST}_${now}.sql
+                TARGET=${DBHOST}_pgsql_${db}_${now}.sql
                 pg_dump -h ${DBHOST} -p ${DBPORT} -U ${DBUSER} $db > ${TMPDIR}/${TARGET}
                 generate_md5
                 compression
@@ -165,7 +165,7 @@ function backup_pgsql() {
 }
 
 function backup_redis() {
-    TARGET=redis_${db}_${DBHOST}_${now}.rdb
+    TARGET=${DBHOST}_redis_${db}_${now}.rdb
     echo bgsave | redis-cli -h ${DBHOST} -p ${DBPORT} --rdb ${TMPDIR}/${TARGET}
     echo "** [db-backup] Dumping Redis - Flushing Redis Cache First"
     sleep 10
@@ -186,7 +186,7 @@ function backup_redis() {
 }
 
 function backup_rethink() {
-    TARGET=rethink_${db}_${DBHOST}_${now}.tar.gz  
+    TARGET=${DBHOST}_rethink_${db}_${now}.tar.gz  
     echo "** [db-backup] Dumping rethink Database: $db"
     rethinkdb dump -f ${TMPDIR}/${TARGET} -c ${DBHOST}:${DBPORT} ${RETHINK_PASS_STR} ${RETHINK_DB_STR}
     move_backup
@@ -252,7 +252,7 @@ echo '** [db-backup] Initialized at at '$(date)
 
 ### Define Target name
     now=$(date +"%Y%m%d-%H%M%S")
-    TARGET=${DBTYPE}_${DBNAME}_${DBHOST}_${now}.sql
+    TARGET=${DBHOST}_${DBTYPE}_${DBNAME}_${now}.sql
 
 ### Take a Dump
        case "$DBTYPE" in
@@ -278,6 +278,9 @@ echo '** [db-backup] Initialized at at '$(date)
         backup_rethink
         ;;
         esac
+
+### Backup finished  
+echo '** [db-backup] finished at at '$(date)
 
 ### Zabbix 
     if [ "$ENABLE_ZABBIX" = "TRUE" ] || [ "$ENABLE_ZABBIX" = "true" ];  then
